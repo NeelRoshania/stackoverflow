@@ -22,7 +22,6 @@ class BaseView(AjaxFormMixin_Home, AjaxFormMixin_Production, FormMixin, Template
 
     # get request for home page -> return context from AjaxFormMixin_Home by overiding parent class + define auto_id for generated fields
     def get(self, request, *args, **kwargs):
-        print("home BaseView: GET request called. ")
         self.form_class = UserToDoForm
         context = super(BaseView, self).get_context_data(**kwargs)
         context.update({
@@ -32,7 +31,6 @@ class BaseView(AjaxFormMixin_Home, AjaxFormMixin_Production, FormMixin, Template
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):   
-        print("home BaseView: POST request called. ")
         # Decide validation form class
         if (request.POST.get('ajaxStatus') == 'addUserNoteForm'):
             self.form_class = UserNoteForm
@@ -54,23 +52,17 @@ class DeleteModelView(View):
 
     # @method_decorator(ensure_csrf_cookie) -> Does not assist with AJAX requests
     def post(self, request, *args, **kwargs):
-        print("home DeleteModel: POST request called to delete object. ")
-        print('{}{}{}{}'.format("ajaxStatus: ", request.POST.get('ajaxStatus'), " pk: ", self.kwargs['pk']))
         self.deleteObject(request.POST.get('ajaxStatus'), self.kwargs['pk'])
-        
         return JsonResponse('Object deleted succesfully.', safe=False)
 
     def deleteObject(self, ajaxStatus, pk):
-        print('{}{}'.format("ajaxStatus: ", ajaxStatus))
         try:
             if (ajaxStatus=="deleteUserToDo"):
                 _ = get_object_or_404(UserToDo, pk=pk)
-                print('{}{}'.format("Object to delete: ", _))
                 _.delete()
 
             elif (ajaxStatus=="deleteUserNote"):
                 _ = get_object_or_404(UserNote, pk=pk)
-                print('{}{}'.format("Object to delete: ", _))
                 _.delete()
 
             else:
@@ -88,8 +80,6 @@ class EditUserToDoView(AjaxFormMixin_Home, FormMixin, TemplateResponseMixin, Vie
 
     # get data from database -> different from get_context_data as it does not return an HTTPResponse
     def get(self, request, *args, **kwargs):
-        print("Home EditUserToDoView: GET request called. ")
-        print("pk: " + self.kwargs['pk'])
 
         # Get author object and form instance and return from instance to view
         obj = get_object_or_404(UserToDo, pk=self.kwargs['pk'])
@@ -98,8 +88,6 @@ class EditUserToDoView(AjaxFormMixin_Home, FormMixin, TemplateResponseMixin, Vie
 
     # Post data to database
     def post(self, request, *args, **kwargs):
-        print("home EditUserToDoView: POST request called. ")
-
         form = self.get_form()
         if form.is_valid():
             return self.form_valid(form)
@@ -114,9 +102,6 @@ class EditUserNoteView(AjaxFormMixin_Home, FormMixin, TemplateResponseMixin, Vie
 
     # get data from database -> different from get_context_data as it does not return an HTTPResponse
     def get(self, request, *args, **kwargs):
-        print("home EditUserNoteView: GET request called. ")
-        print("pk: " + self.kwargs['pk'])
-
         # Get author object and form instance and return from instance to view
         obj = get_object_or_404(UserNote, pk=self.kwargs['pk'])
         form = UserNoteForm(instance=obj, auto_id='editUserNote_%s')
@@ -124,8 +109,6 @@ class EditUserNoteView(AjaxFormMixin_Home, FormMixin, TemplateResponseMixin, Vie
 
     # Post data to database
     def post(self, request, *args, **kwargs):
-        print("home EditUserNoteView: POST request called. ")
-
         form = self.get_form()
         if form.is_valid():
             return self.form_valid(form)
